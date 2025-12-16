@@ -1,0 +1,71 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+
+    paths:
+        - database/
+        - src/
+        - tests/
+
+    excludePaths:
+        - src/Filament/Actions/NotesTableAction.php
+        - src/Filament/Actions/SubscriptionTableAction.php
+
+    # Level 10 is the highest level
+    level: 1
+
+    ignoreErrors:
+        -
+            message: '#^Unsafe usage of new static\(\)\.$#'
+            identifier: new.static
+            count: 1
+            path: src/Actions/HtmlToMarkdown.php
+
+        -
+            message: '#^Unsafe usage of new static\(\)\.$#'
+            identifier: new.static
+            count: 1
+            path: src/Actions/ParseNote.php
+
+        -
+            message: '#^Unsafe usage of new static\(\)\.$#'
+            identifier: new.static
+            count: 1
+            path: src/Actions/SaveNote.php
+
+        -
+            message: '#^Cannot instantiate interface Kirschbaum\\Notations\\Contracts\\RenderableNote\.$#'
+            identifier: new.interface
+            count: 1
+            path: src/Livewire/RenderableNoteSynth.php
+
+        -
+            message: '#^Unsafe usage of new static\(\)\.$#'
+            identifier: new.static
+            count: 1
+            path: src/RenderableNote.php
+
+        -
+            message: '#^Call to an undefined method PHPUnit\\Framework\\TestCase::[a-zA-Z0-9_]+\(\)\.$#'
+            identifier: method.notFound
+            count: 3
+            path: tests/**/*.php
+
+        -
+            message: '#^Undefined variable\: \$this$#'
+            identifier: variable.undefined
+            count: 3
+            path: tests/Pest.php
+
+        -
+            message: '#^Call to an undefined method PHPUnit\\Framework\\TestCase\:\:assertDatabaseHas\(\)\.$#'
+            identifier: method.notFound
+            count: 2
+            path: tests/Livewire/NoteReactionTest.php
+
+        -
+            message: '#^Call to an undefined method PHPUnit\\Framework\\TestCase\:\:assertDatabaseMissing\(\)\.$#'
+            identifier: method.notFound
+            count: 3
+            path: tests/Livewire/NoteReactionTest.php

@@ -45,6 +45,6 @@ const defaultOptions = {
 
 compile({
     ...defaultOptions,
-    entryPoints: ['./resources/js/index.js'],
-    outfile: './resources/dist/filament-notes.js',
+    entryPoints: ['./resources/js/commentions.js'],
+    outfile: './resources/dist/commentions.js',
 })

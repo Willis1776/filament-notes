@@ -1,22 +1,17 @@
 <?php
 
-namespace Willis1776\FilamentNotes\Tests;
+namespace Tests;
 
 use BladeUI\Heroicons\BladeHeroiconsServiceProvider;
 use BladeUI\Icons\BladeIconsServiceProvider;
-use Filament\Actions\ActionsServiceProvider;
 use Filament\FilamentServiceProvider;
-use Filament\Forms\FormsServiceProvider;
-use Filament\Infolists\InfolistsServiceProvider;
-use Filament\Notifications\NotificationsServiceProvider;
 use Filament\Support\SupportServiceProvider;
-use Filament\Tables\TablesServiceProvider;
-use Filament\Widgets\WidgetsServiceProvider;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+use Kirschbaum\Commentions\NotationsServiceProvider;
 use Livewire\LivewireServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
-use RyanChandler\BladeCaptureDirective\BladeCaptureDirectiveServiceProvider;
-use Willis1776\FilamentNotes\FilamentNotesServiceProvider;
+use Tests\Models\User;
 
 class TestCase extends Orchestra
 {
@@ -24,37 +19,63 @@ class TestCase extends Orchestra
     {
         parent::setUp();
 
-        Factory::guessFactoryNamesUsing(
-            fn (string $modelName) => 'Willis1776\\FilamentNotes\\Database\\Factories\\' . class_basename($modelName) . 'Factory'
-        );
+        $this->setUpDatabase();
+
+        config()->set('app.key', '7xE3Nz29bGRceBATftriyTuiYF7DcOjb');
+        config()->set('commentions.commenter.model', User::class);
     }
 
     protected function getPackageProviders($app)
     {
         return [
-            ActionsServiceProvider::class,
-            BladeCaptureDirectiveServiceProvider::class,
-            BladeHeroiconsServiceProvider::class,
             BladeIconsServiceProvider::class,
+            BladeHeroiconsServiceProvider::class,
+            NotationsServiceProvider::class,
             FilamentServiceProvider::class,
-            FormsServiceProvider::class,
-            InfolistsServiceProvider::class,
-            LivewireServiceProvider::class,
-            NotificationsServiceProvider::class,
             SupportServiceProvider::class,
-            TablesServiceProvider::class,
-            WidgetsServiceProvider::class,
-            FilamentNotesServiceProvider::class,
+            LivewireServiceProvider::class,
         ];
     }
 
-    public function getEnvironmentSetUp($app)
+    protected function getEnvironmentSetUp($app)
     {
-        config()->set('database.default', 'testing');
+        $app['config']->set('database.default', 'sqlite');
+        $app['config']->set('database.connections.sqlite', [
+            'driver' => 'sqlite',
+            'database' => ':memory:',
+            'prefix' => '',
+        ]);
+    }
 
-        /*
-        $migration = include __DIR__.'/../database/migrations/create_filament-notes_table.php.stub';
-        $migration->up();
-        */
+    protected function setUpDatabase()
+    {
+        Schema::dropAllTables();
+
+        $migrations = [
+            __DIR__ . '/../database/migrations/create_commentions_tables.php.stub',
+            __DIR__ . '/../database/migrations/create_commentions_reactions_table.php.stub',
+            __DIR__ . '/../database/migrations/create_commentions_subscriptions_table.php.stub',
+        ];
+
+        foreach ($migrations as $migration) {
+            $migration = include $migration;
+
+            $migration->up();
+        }
+
+        Schema::create('users', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->string('password');
+            $table->timestamps();
+        });
+
+        Schema::create('posts', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('title');
+            $table->text('content');
+            $table->timestamps();
+        });
     }
 }
